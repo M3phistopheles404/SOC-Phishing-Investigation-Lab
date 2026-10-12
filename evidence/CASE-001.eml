@@ -1,0 +1,33 @@
+Date: Sun, 20 Sep 2026 09:15:00 +0000
+Message-ID: <case001.20260920@secure-payroll-support.example>
+From: BluePeak Payroll <payroll-update@secure-payroll-support.example>
+To: alice.harris@bluepeak.example
+Subject: Action required: payroll adjustment form
+Reply-To: payroll-help@secure-payroll-support.example
+Return-Path: <bounce@mailer.secure-payroll-support.example>
+Received: from mail.secure-payroll-support.example
+ (mail.secure-payroll-support.example [198.51.100.25]) by mx.bluepeak.example
+ with ESMTPS id case-001; Sun, 20 Sep 2026 09:15:00 +0000
+Authentication-Results: mx.bluepeak.example; spf=fail
+ smtp.mailfrom=bounce@mailer.secure-payroll-support.example; dkim=none
+ header.d=none; dmarc=fail header.from=secure-payroll-support.example
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============7379048261295534347=="
+
+--===============7379048261295534347==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Please review the attached payroll adjustment form before 11:00 UTC.
+
+--===============7379048261295534347==
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="Payroll_Adjustment_Q3.docm"
+MIME-Version: 1.0
+
+UEhJU0hJTkcgTEFCIC0gSU5FUlQgVFJBSU5JTkcgQVRUQUNITUVOVApDYXNlOiBDQVNFLTAwMQpU
+aGlzIGZpbGUgY29udGFpbnMgcGxhaW4gdGV4dCBvbmx5IGFuZCBwZXJmb3JtcyBubyBhY3Rpb24u
+Cg==
+
+--===============7379048261295534347==--

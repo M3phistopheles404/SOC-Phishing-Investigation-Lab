@@ -1,0 +1,33 @@
+Date: Sun, 20 Sep 2026 14:15:00 +0000
+Message-ID: <case006.20260920@shipping-docs.example>
+From: Courier Documentation <docs@shipping-docs.example>
+To: warehouse@bluepeak.example
+Subject: Undelivered parcel documentation
+Reply-To: docs@shipping-docs.example
+Return-Path: <mailer@shipping-docs.example>
+Received: from mx.shipping-docs.example (mx.shipping-docs.example
+ [203.0.113.91]) by mx.bluepeak.example with ESMTPS id case-006; Sun, 20 Sep
+ 2026 14:15:00 +0000
+Authentication-Results: mx.bluepeak.example; spf=fail
+ smtp.mailfrom=mailer@shipping-docs.example; dkim=fail
+ header.d=shipping-docs.example; dmarc=fail header.from=shipping-docs.example
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0407918149340828387=="
+
+--===============0407918149340828387==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Open the attached parcel documents to reschedule delivery.
+
+--===============0407918149340828387==
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="Parcel_Documents.zip"
+MIME-Version: 1.0
+
+UEhJU0hJTkcgTEFCIC0gSU5FUlQgVFJBSU5JTkcgQVRUQUNITUVOVApDYXNlOiBDQVNFLTAwNgpU
+aGlzIGZpbGUgY29udGFpbnMgcGxhaW4gdGV4dCBvbmx5IGFuZCBwZXJmb3JtcyBubyBhY3Rpb24u
+Cg==
+
+--===============0407918149340828387==--

@@ -1,0 +1,20 @@
+Date: Sun, 20 Sep 2026 13:40:00 +0000
+Message-ID: <case005.20260920@executive-consulting.example>
+From: Daniel Reeve - CEO <daniel.reeve@executive-consulting.example>
+To: maya.singh@bluepeak.example
+Subject: Urgent request before client meeting
+Reply-To: d.reeve.personal@fastmail-request.example
+Return-Path: <daniel.reeve@executive-consulting.example>
+Received: from smtp.executive-consulting.example
+ (smtp.executive-consulting.example [198.51.100.88]) by mx.bluepeak.example
+ with ESMTPS id case-005; Sun, 20 Sep 2026 13:40:00 +0000
+Authentication-Results: mx.bluepeak.example; spf=pass
+ smtp.mailfrom=daniel.reeve@executive-consulting.example; dkim=pass
+ header.d=executive-consulting.example; dmarc=pass
+ header.from=executive-consulting.example
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+I am in a client meeting. Reply to this email so I can send you a confidentia=
+l purchase request.

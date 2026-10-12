@@ -1,0 +1,133 @@
+# SOC Phishing Investigation Lab - SPL Query Pack
+# Index: phishing_lab
+# Lab: PHISH-2026-A
+# Use earliest=0 because the synthetic event timestamps may be outside the default Splunk time picker.
+
+################################################################################
+# 1. EMAIL INVENTORY
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" event_type="email_received"
+| dedup event_id
+| eval _time=strptime(timestamp,"%Y-%m-%dT%H:%M:%SZ")
+| sort 0 _time
+| table _time case_id sender_display sender recipient subject spf dkim dmarc attachment_name url gateway_action
+
+################################################################################
+# 2. FIELD DISCOVERY
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A"
+| fieldsummary
+
+################################################################################
+# 3. AUTHENTICATION-FAILURE DETECTION
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" event_type="email_received"
+| dedup event_id
+| eval spf_clean=lower(mvindex(spf,0)), dkim_clean=lower(mvindex(dkim,0)), dmarc_clean=lower(mvindex(dmarc,0))
+| eval auth_failure_count=if(spf_clean="fail",1,0)+if(in(dkim_clean,"fail","none"),1,0)+if(dmarc_clean="fail",1,0)
+| where auth_failure_count>0
+| table case_id sender recipient subject spf_clean dkim_clean dmarc_clean attachment_name gateway_action auth_failure_count
+| sort - auth_failure_count
+
+################################################################################
+# 4. SUSPICIOUS ATTACHMENT EXTENSIONS
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" event_type="email_received"
+| dedup event_id
+| eval attachment_clean=lower(mvindex(attachment_name,0))
+| where match(attachment_clean,"[.](docm|xlsm|js|vbs|exe|iso|zip)$")
+| table case_id sender subject attachment_name attachment_sha256 spf dkim dmarc gateway_action
+
+################################################################################
+# 5. BRAND-LOOKALIKE DETECTION - MICROSOFT / MICR0SOFT
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" event_type="email_received"
+| dedup event_id
+| eval sender_clean=lower(mvindex(sender,0))
+| eval url_clean=lower(mvindex(url,0))
+| where match(sender_clean,"micr[o0]soft") OR match(url_clean,"m365|microsoft")
+| table case_id sender sender_display subject url url_domain spf dkim dmarc gateway_action
+
+################################################################################
+# 6. REPLY-TO DOMAIN MISMATCH
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" event_type="email_received"
+| dedup event_id
+| eval sender_clean=mvindex(sender,0)
+| eval reply_clean=mvindex(reply_to,0)
+| eval sender_domain=lower(mvindex(split(sender_clean,"@"),1))
+| eval reply_domain=lower(mvindex(split(reply_clean,"@"),1))
+| where isnotnull(reply_domain) AND reply_domain!="" AND sender_domain!=reply_domain
+| table case_id sender_clean sender_display reply_clean subject sender_domain reply_domain spf dkim dmarc gateway_action
+
+################################################################################
+# 7. CASE-002 CLICK-TO-SIGN-IN CORRELATION
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" case_id="CASE-002"
+| dedup event_id
+| eval _time=strptime(timestamp,"%Y-%m-%dT%H:%M:%SZ")
+| eval click_epoch=if(event_type="user_action" AND action="clicked_link",_time,null())
+| eval signin_epoch=if(event_type="identity_signin" AND result="success" AND mfa="not_satisfied",_time,null())
+| eval suspicious_ip=if(event_type="identity_signin" AND result="success" AND mfa="not_satisfied",source_ip,null())
+| stats min(click_epoch) as click_epoch min(signin_epoch) as signin_epoch values(suspicious_ip) as suspicious_ip by case_id
+| eval seconds_after_click=signin_epoch-click_epoch
+| eval click_time=strftime(click_epoch,"%Y-%m-%d %H:%M:%S UTC"), signin_time=strftime(signin_epoch,"%Y-%m-%d %H:%M:%S UTC")
+| table case_id click_time signin_time seconds_after_click suspicious_ip
+
+################################################################################
+# 8. CASE TIMELINE
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" case_id="CASE-002"
+| dedup event_id
+| eval _time=strptime(timestamp,"%Y-%m-%dT%H:%M:%SZ")
+| sort 0 _time
+| eval readable_time=strftime(_time,"%Y-%m-%d %H:%M:%S UTC")
+| table readable_time event_type user action sender recipient subject url source_ip result mfa gateway_action
+
+################################################################################
+# 9. CASE-001 IOC SEARCH
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" case_id="CASE-001"
+| dedup event_id
+| eval _time=strptime(timestamp,"%Y-%m-%dT%H:%M:%SZ")
+| sort 0 _time
+| table _time event_type sender recipient subject action attachment_name attachment_sha256 domain source_ip verdict gateway_action
+
+################################################################################
+# 10. PHISHING TRIAGE RISK SCORE
+################################################################################
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" event_type="email_received"
+| dedup event_id
+| eval sender_clean=mvindex(sender,0), reply_clean=mvindex(reply_to,0), attachment_clean=mvindex(attachment_name,0), url_clean=mvindex(url,0)
+| eval sender_domain=lower(mvindex(split(sender_clean,"@"),1)), reply_domain=lower(mvindex(split(reply_clean,"@"),1))
+| eval spf_clean=lower(mvindex(spf,0)), dkim_clean=lower(mvindex(dkim,0)), dmarc_clean=lower(mvindex(dmarc,0)), gateway_clean=lower(mvindex(gateway_action,0))
+| eval auth_score=if(spf_clean="fail",2,0)+if(dmarc_clean="fail",2,0)+if(in(dkim_clean,"fail","none"),1,0)
+| eval reply_score=if(isnotnull(reply_domain) AND reply_domain!="" AND sender_domain!=reply_domain,2,0)
+| eval attachment_score=if(match(lower(attachment_clean),"[.](docm|xlsm|js|vbs|exe|iso|zip)$"),3,0)
+| eval link_score=if(isnotnull(url_clean) AND url_clean!="",1,0)
+| eval brand_score=if(match(lower(sender_clean),"micr[o0]soft"),3,0)
+| eval containment_adjustment=if(gateway_clean="blocked",-2,0)
+| eval risk_score=auth_score+reply_score+attachment_score+link_score+brand_score+containment_adjustment
+| eval triage_priority=case(risk_score>=5,"High",risk_score>=3,"Medium",risk_score>=1,"Low",true(),"Review")
+| sort - risk_score
+| table case_id sender_clean subject gateway_clean risk_score triage_priority

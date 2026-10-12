@@ -1,0 +1,20 @@
+Date: Sun, 20 Sep 2026 10:02:00 +0000
+Message-ID: <case002.20260920@micr0soft-security.example>
+From: Microsoft 365 Security <security-alert@micr0soft-security.example>
+To: alice.harris@bluepeak.example
+Subject: Unusual Microsoft 365 sign-in - verify now
+Reply-To: security-alert@micr0soft-security.example
+Return-Path: <security-alert@micr0soft-security.example>
+Received: from smtp.micr0soft-security.example
+ (smtp.micr0soft-security.example [203.0.113.44]) by mx.bluepeak.example with
+ ESMTPS id case-002; Sun, 20 Sep 2026 10:02:00 +0000
+Authentication-Results: mx.bluepeak.example; spf=pass
+ smtp.mailfrom=security-alert@micr0soft-security.example; dkim=pass
+ header.d=micr0soft-security.example; dmarc=pass
+ header.from=micr0soft-security.example
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+We detected unusual activity. Verify your account at https://login-security-m=
+365.example/session/validate

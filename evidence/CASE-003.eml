@@ -1,0 +1,18 @@
+Date: Sun, 20 Sep 2026 11:10:00 +0000
+Message-ID: <case003.20260920@bluepeak.example>
+From: BluePeak Human Resources <hr@bluepeak.example>
+To: alice.harris@bluepeak.example
+Subject: September benefits newsletter
+Reply-To: hr@bluepeak.example
+Return-Path: <hr@bluepeak.example>
+Received: from mail.bluepeak.example (mail.bluepeak.example [192.0.2.10]) by
+ mx.bluepeak.example with ESMTPS id case-003; Sun, 20 Sep 2026 11:10:00 +0000
+Authentication-Results: mx.bluepeak.example; spf=pass
+ smtp.mailfrom=hr@bluepeak.example; dkim=pass header.d=bluepeak.example;
+ dmarc=pass header.from=bluepeak.example
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+The September benefits newsletter is available on the internal benefits porta=
+l.

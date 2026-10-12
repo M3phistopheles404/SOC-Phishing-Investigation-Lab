@@ -1,0 +1,238 @@
+Email security lab-
+
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" event_type="email_received"
+| dedup event_id
+| eval _time=strptime(timestamp,"%Y-%m-%dT%H:%M:%SZ")
+| sort 0 _time
+| table _time case_id sender_display sender recipient subject spf dkim dmarc attachment_name url 
+gateway_action
+
+
+
+t@micr0soft-security.example (not the original Microsoft domain)
+ 	
+CASE-002
+CASE-002
+Microsoft 365 Security
+Microsoft 365 Security
+security-alert@micr0soft-security.example
+security-alert@micr0soft-security.example
+ 	
+Unusual Microsoft 365 sign-in - verify now
+Unusual Microsoft 365 sign-in - verify now
+pass
+pass
+pass
+pass
+ 	
+https://login-security-m365.example/session/validate
+https://login-security-m365.example/session/validate
+delivered
+delivered
+
+
+
+
+SPF failure
+ 	
+CASE-001
+CASE-001
+BluePeak Payroll
+BluePeak Payroll
+payroll-update@secure-payroll-support.example
+payroll-update@secure-payroll-support.example
+ 	
+Action required: payroll adjustment form
+Action required: payroll adjustment form
+fail
+fail
+none
+none
+ 	
+Payroll_Adjustment_Q3.docm
+Payroll_Adjustment_Q3.docm
+delivered
+delivered
+
+
+
+SPF failure and DKIM failure, gateway action blocked, possible malicious package (Parcel_Documents.zip)
+	
+CASE-006
+CASE-006
+Courier Documentation
+Courier Documentation
+docs@shipping-docs.example
+docs@shipping-docs.example
+ 	
+Undelivered parcel documentation
+Undelivered parcel documentation
+fail
+fail
+fail
+fail
+ 	
+Parcel_Documents.zip
+Parcel_Documents.zip
+blocked
+blocked
+
+ CASE-001: Suspicious Payroll Attachment
+
+ Was the message delivered or blocked? Delivered
+Did the user interact? attachment was opened
+What does local threat intelligence say about the sender domain and attachment hash? malicious
+ Do the authentication results support the suspicious hypothesis? yes
+
+
+CASE-002: Credential-Phishing Link and 
+Account Impact
+
+
+case_id	click_time	signin_time	seconds_after_click	suspicious_ip
+CASE-002	2026-09-20 10:06:30 UTC	2026-09-20 10:10:40 UTC	250.000000	203.0.113.200
+
+The suspicious successful sign-in occurs shortly after the click. (250 seconds)
+
+The email-link behavior maps cleanly to Phishing: Spearphishing Link (T1566.002).
+
+
+
+ CASE-003 and CASE-004: Build a Benign Baseline
+
+
+cse 3 n 4 are benign
+
+ CASE-005: Business Email Compromise / Executive Impersonation
+
+
+index=phishing_lab earliest=0
+| spath
+| search lab_id="PHISH-2026-A" event_type="email_received"
+| dedup event_id
+| eval sender_clean=mvindex(sender,0)
+| eval reply_clean=mvindex(reply_to,0)
+| eval sender_domain=lower(mvindex(split(sender_clean,"@"),1))
+| eval reply_domain=lower(mvindex(split(reply_clean,"@"),1))
+| where isnotnull(reply_domain) AND reply_domain!="" AND sender_domain!=reply_domain
+| table case_id sender_clean sender_display reply_clean subject sender_domain reply_domain
+
+
+case_id	sender_clean	sender_display	reply_clean	subject	sender_domain	reply_domain
+CASE-005
+CASE-005
+daniel.reeve@executive-consulting.example	
+Daniel Reeve - CEO
+Daniel Reeve - CEO
+d.reeve.personal@fastmail-request.example	
+Urgent request before client meeting
+Urgent request before client meeting
+executive-consulting.example	fastmail-request.example
+
+
+Here SPF , DKIM and DMARC is all passed but the email is suspicious due to the following reasons.
+Subject of the mail implies urgency. The sender id is daniel.reeve@executive-consulting.example but the reply to id is different d.reeve.personal@fastmail-request.example.
+The id and domain of the reply to id is trying to pose as the CEO's personal mail id . 
+
+
+
+
+ CASE-006: Malicious but Blocked
+
+Here an attachment was send from docs@shipping-docs.example to warehouse@bluepeak.example. But it failed SPF DKIM and DMARC and was blocked by the gateway. The mail is marked as malicious but pose a lesser risk as it was blocked.
+
+
+
+
+Authentication-failure detection
+
+CASE-001
+CASE-001
+payroll-update@secure-payroll-support.example
+payroll-update@secure-payroll-support.example
+alice.harris@bluepeak.example
+alice.harris@bluepeak.example
+Action required: payroll adjustment form
+Action required: payroll adjustment form
+fail
+fail
+none
+none
+fail
+fail
+Payroll_Adjustment_Q3.docm
+Payroll_Adjustment_Q3.docm
+delivered
+delivered
+3
+
+The email in case 001 was delivered despite failing SPF AND DMARC , while email in case 006 was successfully blocked.
+
+
+
+Suspicious attachment extension
+
+case_id	sender	subject	attachment_name	attachment_sha256	spf	dkim	dmarc	gateway_action
+CASE-006
+CASE-006
+docs@shipping-docs.example
+docs@shipping-docs.example
+Undelivered parcel documentation
+Undelivered parcel documentation
+Parcel_Documents.zip
+Parcel_Documents.zip
+be1b191d4aeba7ab9ff94c4c2826e5e5cf30cce6b61fe091245b1ae22dc6eecd
+be1b191d4aeba7ab9ff94c4c2826e5e5cf30cce6b61fe091245b1ae22dc6eecd
+fail
+fail
+fail
+fail
+fail
+fail
+blocked
+blocked
+
+CASE-001
+CASE-001
+payroll-update@secure-payroll-support.example
+payroll-update@secure-payroll-support.example
+Action required: payroll adjustment form
+Action required: payroll adjustment form
+Payroll_Adjustment_Q3.docm
+Payroll_Adjustment_Q3.docm
+6f9636261ea27b36c2c4f6ed88536702d679561dbb1a3020a7d3dce18cefafd2
+6f9636261ea27b36c2c4f6ed88536702d679561dbb1a3020a7d3dce18cefafd2
+fail
+fail
+none
+none
+fail
+fail
+delivered
+delivered
+
+
+Brand Lookalike Detection
+
+case_id	sender	sender_display	subject	url	url_domain	spf	dkim	dmarc
+CASE-002
+CASE-002
+security-alert@micr0soft-security.example
+security-alert@micr0soft-security.example
+Microsoft 365 Security
+Microsoft 365 Security
+Unusual Microsoft 365 sign-in - verify now
+Unusual Microsoft 365 sign-in - verify now
+https://login-security-m365.example/session/validate
+https://login-security-m365.example/session/validate
+login-security-m365.example
+login-security-m365.example
+pass
+pass
+pass
+pass
+pass
+pass
+
